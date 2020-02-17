@@ -59,11 +59,12 @@ int dijkstra(int u){
 	while(!q.empty()){
 		auto node=q.top();q.pop();
 		auto u=node.u;
+		if(s[u]) continue; //Important!
 		s[u]=1;
 		for(auto node:G[u]){
 			auto v=node.u;
 			auto dist=node.d;
-			if(!s[v] && d[u]+dist<d[v]){
+			if(d[u]+dist<d[v]){ //Relax all
 			  d[v]=d[u]+dist;
 			  q.push(Node{v,d[v]});
 			  p[v]=u;
