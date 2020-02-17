@@ -15,70 +15,87 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 
-struct Edge{
-	int u,v;
-	int dist;
-};
-vector<vector<int>> G;
-vector<int> vis;
-vector<int> topo;
-int t;
-int m,n;
-vector<int> degree;
-queue<int> Q;
-void readGraph(){
+/*void readGraph(){
+	int m,n;
 	cin>>m>>n;
-	t=m;
 	G.resize(m);
-	vis.resize(m);
-	topo.resize(m);
-	degree.resize(m);
+	d.resize(m,MAXINT);
+	s.resize(m);
+	p.resize(m);
 	for(int i=0;i<n;++i){
 		int u,v,d;
 		cin>>u>>v>>d;
-		G[u-1].push_back(v-1);
-		++degree[v-1];
+		edges.push_back(Edge{u,v,d});
+		G[u].push_back(edges.size()-1);
 	}
-}
-bool topoSortDegree(){
-	topo.clear();
-	for(int i=0;i<m;++i){
-		if(degree[i]==0) Q.push(i);
+}*/
+class Solution {
+
+/*struct Edge{
+	int u,v;
+	int dist;
+};*/
+
+/*************** below are Dijkstra template codes ******************/
+const int MAXINT=numeric_limits<int>::max();
+struct Node{
+	int u,d;
+	bool operator<(Node const& rhs) const{
+		return d>rhs.d; // > for min root heap
 	}
-	while(!Q.empty()){
-		auto u=Q.front();Q.pop();
-		topo.push_back(u);
-		for(auto v: G[u]){
-			if(--degree[v]==0) Q.push(v);
+};
+//Do not forget to initialize these vectors with node numbers N
+vector<vector<Node>> G;
+vector<int> d; //Initialize as MAXINT
+vector<bool> s; 
+vector<int> p; // path: node id before
+//vector<Edge> edges;
+
+int dijkstra(int u){
+	priority_queue<Node> q;
+	d[u]=0;
+	p[u]=-1;
+	q.push(Node{u,0});
+	while(!q.empty()){
+		auto node=q.top();q.pop();
+		auto u=node.u;
+		s[u]=1;
+		for(auto node:G[u]){
+			auto v=node.u;
+			auto dist=node.d;
+			if(!s[v] && d[u]+dist<d[v]){
+			  d[v]=d[u]+dist;
+			  q.push(Node{v,d[v]});
+			  p[v]=u;
+			}
 		}
 	}
-	if(topo.size()<m) return false;
-	return true;
+	int maxD=*max_element(d.begin(),d.end());
+	return maxD<MAXINT?maxD:-1;
 }
-bool _topoSortDFS(int u){
-	vis[u]=-1;
-	for(auto v: G[u]){
-		if(vis[v]==-1) return false;
-		if(vis[v]==0 && !_topoSortDFS(v)) return false;
-	}
-	vis[u]=1;
-	topo[--t]=u;
-	return true;
-}
-bool topoSortDFS(){
-	for(int i=0;i<m;++i){
-		if(vis[i]) continue;
-		if(!_topoSortDFS(i)) return false;
-	 }
-	return true;
-}
-const int MAXINT=numeric_limits<int>::max();
+/*******************************************************************/
 
+public:
+    int networkDelayTime(vector<vector<int>>& times, int N, int K) {
+		G.resize(N);d.resize(N,MAXINT);s.resize(N);
+		for(auto triple: times){
+			auto u=triple[0]-1;
+			auto v=triple[1]-1;
+			auto d=triple[2];
+			//edges.push_back(Edge{u,v,d});
+			//G[u].push_back(edges.size()-1);
+			G[u].push_back(Node{v,d});
+		}
+		return dijkstra(K-1);
+    }
+};
 int main()
 {
 	freopen("input.txt","r",stdin);
-	readGraph();
-	if(topoSortDFS()) printVec(topo);
-	else cout<<"Loop"<<endl;
+	/*readGraph();
+	dijstra(0);
+	printVec(d);
+	cout<<endl;
+	printVec(p);*/
 	return 0;
 }
