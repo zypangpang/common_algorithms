@@ -15,67 +15,62 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 
-struct TreeNode {
-    int val;
-    TreeNode *left;
-    TreeNode *right;
-    TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+struct Edge{
+	int u,v;
+	int dist;
 };
-
-class Solution {
-	static const int INTMIN=numeric_limits<int>::min();
-public:
-struct MyTreeNode{
-	int val=INTMIN;
-	int upMax=INTMIN;
-	int max=INTMIN;
-	MyTreeNode *left=NULL;
-    MyTreeNode *right=NULL;
-    MyTreeNode(int x) : val(x){}
-};
-MyTreeNode* copyTree(TreeNode* root){
-	if(root==NULL) return NULL;
-	auto t=new MyTreeNode(root->val);
-	t->left=copyTree(root->left);
-	t->right=copyTree(root->right);
-	return t;
-}
-void getMaxPath(MyTreeNode* root){
-	if(root==NULL) return;
-	if(root->left !=NULL) getMaxPath(root->left);
-	if(root->right !=NULL) getMaxPath(root->right);
-	int lu=root->left==NULL?root->val:root->val+root->left->upMax;
-	int ru=root->right==NULL?root->val:root->val+root->right->upMax;
-	root->upMax=max({root->val,lu,ru});
-	int threeSome=root->val;
-	if(root->left!= NULL) threeSome+=root->left->upMax;
-	if(root->right!=NULL) threeSome+=root->right->upMax;
-	root->max=max({root->upMax,root->left==NULL?INTMIN:root->left->max,root->right==NULL?INTMIN:root->right->max,threeSome});
-}
-    int maxPathSum(TreeNode* root) {
-		auto myRoot=copyTree(root);
-        getMaxPath(myRoot);
-		return myRoot->max;
-    }
-};
-TreeNode* createTree(vector<int> const& s,int& rootIndex){
-	++rootIndex;
-	if(s[rootIndex]==numeric_limits<int>::max()){ 
-		return NULL;
+struct Comp{
+	bool operator()(Edge const& e1,Edge const& e2) const {
+		return e1.dist>e2.dist;
 	}
-	TreeNode* root=new TreeNode(s[rootIndex]);
-	root->left=createTree(s,rootIndex);
-	root->right=createTree(s,rootIndex);
-	return root;
+};
+ostream& operator<<(ostream& out,Edge const& e){
+	out<<"("<<e.u<<","<<e.v<<","<<e.dist<<")";
+	return out;
+}
+priority_queue<Edge,vector<Edge>,Comp> Q;
+vector<int> fa;
+int findFather(int p){
+	if(fa[p]==p) return p;
+	return fa[p]=findFather(fa[p]);
+}
+void myUnion(int p,int q){
+	int u=findFather(p);
+	int v=findFather(q);
+	fa[v]=u;
+}
+int m,n;
+void readGraph(){
+	cin>>m>>n;
+	fa.resize(m);
+	for(int i=0;i<m;++i){
+		fa[i]=i;
+	}
+	for(int i=0;i<n;++i){
+		int u,v,d;
+		cin>>u>>v>>d;
+		Q.push(Edge{u,v,d});
+	}
+}
+vector<Edge> MST(){
+	vector<Edge> mst;
+	while(!Q.empty()){
+	auto e=Q.top();Q.pop();
+	if(findFather(e.u)!=findFather(e.v)){
+		mst.push_back(move(e));
+		myUnion(e.u,e.v);
+	}
+	}
+	if(mst.size()==m-1) return mst;
+	else return vector<Edge>();
 }
 const int MAXINT=numeric_limits<int>::max();
 int main()
 {
-	vector<int> t{-10,9,MAXINT,MAXINT,-10,15,MAXINT,MAXINT,7,MAXINT,MAXINT};
-	int r=-1;
-	auto root=createTree(t,r);
-	Solution s;
-	auto res=s.maxPathSum(root);
-	cout<<res<<endl;
-    return 0;
+
+	freopen("input.txt","r",stdin);
+	readGraph();
+	auto mst=MST();
+	printVec(mst);
+	return 0;
 }
