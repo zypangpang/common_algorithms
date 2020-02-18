@@ -37,47 +37,29 @@ void printList(ListNode* head){
 }
 
 class Solution {
-public:
-    ListNode* mergeTwoListsRecur(ListNode* l1, ListNode* l2) {
-		if(l1==NULL) return l2;
-		if(l2==NULL) return l1;
-		if(l1->val<l2->val){
-			l1->next=mergeTwoListsRecur(l1->next,l2);
-			return l1;
-		}else{
-			l2->next=mergeTwoListsRecur(l1,l2->next);
-			return l2;
+	vector<string> all;
+	void generateParenthesisRecur(string s,int l,int r){
+		if(l==0 && r==0){
+			all.push_back(s);
+			return;
 		}
+		if(r>l)
+			generateParenthesisRecur(s+")",l,r-1);
+		if(l>0)
+			generateParenthesisRecur(s+"(",l-1,r);
 	}
-    ListNode* mergeTwoLists(ListNode* l1, ListNode* l2) {
-		auto p=l1,q=l2;
-		auto c=new ListNode(-1);
-		c->next=l1;
-		auto guard=c;
-		while(p!=NULL||q!=NULL){
-			if(p==NULL || q!=NULL && p->val>q->val){
-				auto t=q;
-				q=q->next;
-				c->next=t;
-				t->next=p;
-				c=t;
-			}
-			else {
-				p=p->next;
-				c=c->next;
-			}
-		}
-		return guard->next;
+public:
+    vector<string> generateParenthesis(int n) {
+		generateParenthesisRecur("",n,n);
+		return all;
     }
 };
 int main()
 {
-	vector<int> v1{1,6,7};
-	vector<int> v2{1,2,3};
 	//freopen("input.txt","r",stdin);
 	//readGraph();
 	Solution solution;
-	auto v=solution.mergeTwoListsRecur(createList(v1),createList(v2));
-	printList(v);
+	auto all=solution.generateParenthesis(3);
+	printVec(all);
     return 0;
 }
