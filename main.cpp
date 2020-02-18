@@ -35,31 +35,43 @@ void printList(ListNode* head){
 		cout<<head->val<<" ";
 	}
 }
-
-class Solution {
-	vector<string> all;
-	void generateParenthesisRecur(string s,int l,int r){
-		if(l==0 && r==0){
-			all.push_back(s);
-			return;
-		}
-		if(r>l)
-			generateParenthesisRecur(s+")",l,r-1);
-		if(l>0)
-			generateParenthesisRecur(s+"(",l-1,r);
+int lowerBound(vector<int> const& v,int x){
+	int p=0,q=v.size();
+	while(p<q){
+		int m=p+(q-p)/2;
+		if(v[m]>=x) q=m;
+		else p=m+1;
 	}
-public:
-    vector<string> generateParenthesis(int n) {
-		generateParenthesisRecur("",n,n);
-		return all;
-    }
-};
+	return p;
+
+}
+int upperBound(vector<int> const& v,int x){
+	int p=0,q=v.size();
+	while(p<q){
+		int m=p+(q-p)/2;
+		if(v[m]<=x) p=m+1;
+		else q=m;
+	}
+	return p;
+
+}
+int binarySearch(vector<int> const& v,int x){
+	int p=0,q=v.size();
+	while(p<q){
+		int m=p+(q-p)/2;
+		if(v[m]==x) return m;
+		if(v[m]<x) p=m+1;
+		else q=m;
+	}
+	return -1;
+
+}
 int main()
 {
 	//freopen("input.txt","r",stdin);
 	//readGraph();
-	Solution solution;
-	auto all=solution.generateParenthesis(3);
-	printVec(all);
+	vector<int> v{2,3,4,5,6};
+	auto a=binarySearch(v,8);
+	cout<<a<<endl;
     return 0;
 }
