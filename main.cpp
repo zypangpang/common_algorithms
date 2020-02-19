@@ -36,29 +36,44 @@ void printList(ListNode* head){
 	}
 }
 class Solution {
+	const unsigned int INTMAX=(1<<31);
 public:
-    int removeDuplicates(vector<int>& nums) {
-		if(nums.size()<2) return nums.size();
-		int p=0;
-		for(int q=1;q<nums.size();++q){
-			if(nums[q]!=nums[p]) {
-				++p;
-				nums[p]=nums[q];
+    int divide(int dividend, int divisor) {
+		long ldivisor=divisor,ldividend=dividend;
+		if(divisor==1) return dividend;
+		if(divisor == -1){
+			if(dividend>=0) return -dividend;
+			if(dividend==-INTMAX) return INTMAX-1;
+			return -dividend;
+		}
+		bool sign=(dividend>0) ^ (divisor>0);
+		int cnt =0;
+		ldivisor=abs((long)divisor);
+		ldividend=abs((long)dividend);
+		while(ldivisor<=ldividend){
+			++cnt;
+			ldivisor<<=1;
+		}
+		int result=0;
+		while(cnt>0){
+			--cnt;
+			ldivisor>>=1;
+			if(ldivisor<=ldividend){
+				result+=(1<<cnt);
+				ldividend-=ldivisor;
 			}
 		}
-		return p+1;
-		
+		return sign?-result:result;
     }
 };
 int main()
 {
 	//freopen("input.txt","r",stdin);
 	//readGraph();
-	vector<int> v{1,2,3,3,4,5,6,6};
+	//vector<int> v{1,2,3,3,4,5,6,6};
 	Solution s;
-	auto a=s.removeDuplicates(v);
+	auto a=s.divide(7,-2);
 	cout<<a<<endl;
-	printVec(v);
     return 0;
 }
 
