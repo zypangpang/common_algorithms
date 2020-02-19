@@ -35,43 +35,31 @@ void printList(ListNode* head){
 		cout<<head->val<<" ";
 	}
 }
-int lowerBound(vector<int> const& v,int x){
-	int p=0,q=v.size();
-	while(p<q){
-		int m=p+(q-p)/2;
-		if(v[m]>=x) q=m;
-		else p=m+1;
-	}
-	return p;
-
-}
-int upperBound(vector<int> const& v,int x){
-	int p=0,q=v.size();
-	while(p<q){
-		int m=p+(q-p)/2;
-		if(v[m]<=x) p=m+1;
-		else q=m;
-	}
-	return p;
-
-}
-int binarySearch(vector<int> const& v,int x){
-	int p=0,q=v.size();
-	while(p<q){
-		int m=p+(q-p)/2;
-		if(v[m]==x) return m;
-		if(v[m]<x) p=m+1;
-		else q=m;
-	}
-	return -1;
-
-}
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+		if(nums.size()<2) return nums.size();
+		int p=0;
+		for(int q=1;q<nums.size();++q){
+			if(nums[q]!=nums[p]) {
+				++p;
+				nums[p]=nums[q];
+			}
+		}
+		return p+1;
+		
+    }
+};
 int main()
 {
 	//freopen("input.txt","r",stdin);
 	//readGraph();
-	vector<int> v{2,3,4,5,6};
-	auto a=binarySearch(v,8);
+	vector<int> v{1,2,3,3,4,5,6,6};
+	Solution s;
+	auto a=s.removeDuplicates(v);
 	cout<<a<<endl;
+	printVec(v);
     return 0;
 }
+
+
