@@ -36,44 +36,60 @@ void printList(ListNode* head){
 	}
 }
 class Solution {
-	const unsigned int INTMAX=(1<<31);
-public:
-    int divide(int dividend, int divisor) {
-		long ldivisor=divisor,ldividend=dividend;
-		if(divisor==1) return dividend;
-		if(divisor == -1){
-			if(dividend>=0) return -dividend;
-			if(dividend==-INTMAX) return INTMAX-1;
-			return -dividend;
+struct hash_pair { 
+    template <class T1, class T2> 
+    size_t operator()(const pair<T1, T2>& p) const
+    { 
+        auto hash1 = hash<T1>{}(p.first); 
+        auto hash2 = hash<T2>{}(p.second); 
+        return hash1 ^ hash2; 
+    } 
+}; 
+	unordered_map<pair<int,int>,bool,hash_pair> mem;
+	string _s,_p;
+	bool match(int i,int j){
+		if(mem.count({i,j})) return mem[{i,j}];
+		if(i>=_s.size()){
+			for(int k=j;k<_p.size();++k)
+			  if(_p[k]!='*')
+				return mem[{i,j}]=false;
+			return mem[{i,j}]=true;
 		}
-		bool sign=(dividend>0) ^ (divisor>0);
-		int cnt =0;
-		ldivisor=abs((long)divisor);
-		ldividend=abs((long)dividend);
-		while(ldivisor<=ldividend){
-			++cnt;
-			ldivisor<<=1;
-		}
-		int result=0;
-		while(cnt>0){
-			--cnt;
-			ldivisor>>=1;
-			if(ldivisor<=ldividend){
-				result+=(1<<cnt);
-				ldividend-=ldivisor;
+		if(j>=_p.size()) return mem[{i,j}]=false;
+		if(_p[j]=='?'||_p[j]==_s[i]) return mem[{i,j}]=match(i+1,j+1);
+		if(_p[j]=='*'){
+			for(int k=i;k<=_s.size();++k){
+				if(match(k,j+1)) 
+				  return mem[{i,j}]=true;
 			}
 		}
-		return sign?-result:result;
+		return mem[{i,j}]=false;
+	}
+public:
+    bool isMatch(string s, string p) {
+		for(int i=0;i<p.size();++i){
+			if(p[i]=='*'){
+				int k;
+				for(k=i+1;k<p.size();++k){
+					if(p[k]!='*') break;
+				}
+				_p.push_back('*');
+				i=k-1;
+			}else
+				_p.push_back(p[i]);
+		}
+		_s=s;
+		cout<<_p<<endl;
+		return match(0,0);
     }
 };
 int main()
 {
 	//freopen("input.txt","r",stdin);
 	//readGraph();
-	//vector<int> v{1,2,3,3,4,5,6,6};
-	Solution s;
-	auto a=s.divide(7,-2);
-	cout<<a<<endl;
+	string s = "abc",p = "a***b***c***";
+	Solution sol;
+	cout<<sol.isMatch(s,p)<<endl;
     return 0;
 }
 
