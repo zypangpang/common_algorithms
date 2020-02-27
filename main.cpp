@@ -36,60 +36,42 @@ void printList(ListNode* head){
 	}
 }
 class Solution {
-struct hash_pair { 
-    template <class T1, class T2> 
-    size_t operator()(const pair<T1, T2>& p) const
-    { 
-        auto hash1 = hash<T1>{}(p.first); 
-        auto hash2 = hash<T2>{}(p.second); 
-        return hash1 ^ hash2; 
-    } 
-}; 
-	unordered_map<pair<int,int>,bool,hash_pair> mem;
-	string _s,_p;
-	bool match(int i,int j){
-		if(mem.count({i,j})) return mem[{i,j}];
-		if(i>=_s.size()){
-			for(int k=j;k<_p.size();++k)
-			  if(_p[k]!='*')
-				return mem[{i,j}]=false;
-			return mem[{i,j}]=true;
-		}
-		if(j>=_p.size()) return mem[{i,j}]=false;
-		if(_p[j]=='?'||_p[j]==_s[i]) return mem[{i,j}]=match(i+1,j+1);
-		if(_p[j]=='*'){
-			for(int k=i;k<=_s.size();++k){
-				if(match(k,j+1)) 
-				  return mem[{i,j}]=true;
-			}
-		}
-		return mem[{i,j}]=false;
-	}
 public:
-    bool isMatch(string s, string p) {
-		for(int i=0;i<p.size();++i){
-			if(p[i]=='*'){
-				int k;
-				for(k=i+1;k<p.size();++k){
-					if(p[k]!='*') break;
-				}
-				_p.push_back('*');
-				i=k-1;
-			}else
-				_p.push_back(p[i]);
+    vector<vector<int>> permute(vector<int>& nums) {
+		if(nums.empty()) return vector<vector<int>>();
+		if(nums.size()==1) return vector<vector<int>>{nums};
+		vector<vector<int>> resVec;
+		sort(nums.begin(),nums.end());
+		resVec.push_back(nums);
+		int n=nums.size();
+		while(1){
+			int lp=-1;
+			for(int i=0;i<n-1;++i){
+				if(nums[i]<nums[i+1])
+				  lp=i;
+			}
+			if(lp==-1) break;
+			int lb=0;
+			for(int i=lp+1;i<n;++i){
+				if(nums[i]>nums[lp]) 
+				  lb=i;
+			}
+			swap(nums[lp],nums[lb]);
+			for(int i=1;i<=(n-lp)/2;++i){
+				swap(nums[lp+i],nums[n-i]);
+			}
+			resVec.push_back(nums);
 		}
-		_s=s;
-		cout<<_p<<endl;
-		return match(0,0);
+		return resVec;
     }
 };
 int main()
 {
 	//freopen("input.txt","r",stdin);
 	//readGraph();
-	string s = "abc",p = "a***b***c***";
 	Solution sol;
-	cout<<sol.isMatch(s,p)<<endl;
+	vector<int> a{1,2,3,4};
+	sol.permute(a);
     return 0;
 }
 
