@@ -36,34 +36,27 @@ void printList(ListNode* head){
 	}
 }
 class Solution {
+	vector<vector<int>> resVec;
+	void getPermutation(vector<int> & v, int first){
+		if(first>=v.size()) {
+			printVec(v);
+			cout<<endl;
+			resVec.push_back(v);
+			return;
+		}
+		for(int i=first;i<v.size();++i){
+			swap(v[i],v[first]);
+			getPermutation(v,first+1);
+			swap(v[i],v[first]);
+		}
+	}
 public:
     vector<vector<int>> permute(vector<int>& nums) {
 		if(nums.empty()) return vector<vector<int>>();
 		if(nums.size()==1) return vector<vector<int>>{nums};
-		vector<vector<int>> resVec;
-		sort(nums.begin(),nums.end());
-		resVec.push_back(nums);
-		int n=nums.size();
-		while(1){
-			int lp=-1;
-			for(int i=0;i<n-1;++i){
-				if(nums[i]<nums[i+1])
-				  lp=i;
-			}
-			if(lp==-1) break;
-			int lb=0;
-			for(int i=lp+1;i<n;++i){
-				if(nums[i]>nums[lp]) 
-				  lb=i;
-			}
-			swap(nums[lp],nums[lb]);
-			for(int i=1;i<=(n-lp)/2;++i){
-				swap(nums[lp+i],nums[n-i]);
-			}
-			resVec.push_back(nums);
-		}
+		getPermutation(nums,0);
 		return resVec;
-    }
+	}
 };
 int main()
 {
