@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <cassert>
 #include <chrono>
+#include <array>
 
 using namespace std;
 
@@ -35,135 +36,68 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 
-//KMP implementation based codes on the Internet
-class KMP {
-    static int getNext(vector<int>& next, string const& str) {
-        int len = str.size(), k = 0;
-        for(int i = 1; i < len; i++) {
-            while(k>0 && str[i]!= str[k]) k = next[k-1];
-            next[i] = (k+=str[i]== str[k]);
-        }
-        return next[len-1];
-    }
-
-    static int match(string const& str, string const& pattern, vector<int> const& next) {
-        int ans = 0, len1 = str.size(), len2 = pattern.size(), k =0;
-        for(int i = 0; i < len1; i++) {
-            while(k > 0 &&str[i] != pattern[k]) k = next[k-1];
-            k += (str[i] == pattern[k]);
-            if(k == len2) ans++;
-        }
-        return ans;
+class Solution {
+	string bucketSort(string const& s){
+		array<int,26> alphabet;
+		alphabet.fill(0);
+		for_each(s.begin(),s.end(),[&](char x){++alphabet[x-'a'];});
+		string res;
+		for(int i=0;i<26;++i){
+			while(alphabet[i]--) res.push_back('a'+i);
+		}
+		return res;
+	}
+	vector<vector<string>> groupAnagrams1(vector<string>& strs) {
+		vector<vector<string>> res;
+		if(strs.empty()) return res;
+		vector<string> tstrs=strs;
+		for_each(tstrs.begin(),tstrs.end(),[=](string& s){
+					bucketSort(s);});
+		vector<int> index(strs.size());
+		for(int i=0;i<strs.size();++i) index[i]=i;
+		sort(index.begin(),index.end(),[&](int a,int b){
+					return tstrs[a]<tstrs[b];});
+		res.push_back(vector<string>{strs[index[0]]});
+		for(int i=1;i<index.size();++i){
+			if(tstrs[index[i]]==tstrs[index[i-1]]){
+				res.back().push_back(strs[index[i]]);
+			}else{
+				res.push_back(vector<string>{strs[index[i]]});
+			}
+		}
+		return res;
     }
 public:
-    static int count(string const& str,string const& pattern) {
-        vector<int> next(pattern.size(), 0);
-        getNext(next, pattern);
-        return match(str, pattern, next);
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+		vector<vector<string>> res;
+		if(strs.empty()) return res;
+		unordered_map<string,vector<string>> strMap;
+		for(auto const& s: strs){
+			auto const& ss=bucketSort(s);
+			strMap[ss].push_back(s);
+		}
+		for(auto const& v: strMap){
+			res.push_back(v.second);
+		}
+		return res;
     }
 };
-
-//Fast version with the suffix array
-void fastFindAllRepeatedSubstr(string const& s, unordered_set<string>& v){
-    vector<string> suffixArr;
-    for(int i=0;i<s.size();++i){
-        suffixArr.push_back(s.substr(i));
-    }
-    sort(suffixArr.begin(),suffixArr.end());
-    for(int i=0;i<suffixArr.size()-1;++i){
-        int k=0;
-        int l=suffixArr[i].size(),r=suffixArr[i+1].size();
-        while(k<l && k<r && suffixArr[i][k]==suffixArr[i+1][k]) ++k;
-        if(k>1)
-            v.insert(suffixArr[i].substr(0,k));
-    }
-}
-
-//Naive version
-void findAllRepeatedSubstr(string const& s, unordered_set<string>& v){
-    int n=s.size();
-    for(int i=0;i<n;++i){
-        for(int j=i+1;j<n;++j){
-            if(s[i]==s[j]){
-               int k=1;
-               while(i+k<n&&j+k<n&&s[i+k]==s[j+k]) ++k;
-               if(k>1)
-                   v.insert(s.substr(i,k));
-            }
-        }
-    }
-}
-
-//Get substrs with most occurrences
-void getRepeatedMost(string const& s, unordered_set<string> const& v, vector<string>& res){
-    int maxTimes=0;
-    for(string const& x: v){
-        auto sum=KMP::count(s,x);
-        if(sum>maxTimes){
-            res.clear();
-            maxTimes=sum;
-            res.push_back(x);
-        }
-        else if(sum==maxTimes){
-            res.push_back(x);
-        }
-    }
-
-}
-
-//Test function
-void test(vector<string> const& cases){
-    for(auto const& s:cases){
-        cout<<endl;
-        cout<<"[Test case] "<<s.substr(0,50)<<(s.size()>50?"... :":":")<<endl;
-        cout<<"size: "<<s.size()<<endl;
-
-        //Solution 1
-        unordered_set<string> v1;
-        vector<string> res1;
-        {
-            ScopedTimer timer;
-            findAllRepeatedSubstr(s,v1);
-            getRepeatedMost(s,v1,res1);
-        }
-        if(!res1.empty()){
-            printVec(res1);
-            cout<<endl;
-        }
-
-
-        //Solution 2
-        unordered_set<string> v2;
-        vector<string> res2;
-        {
-            ScopedTimer timer;
-            fastFindAllRepeatedSubstr(s,v2);
-            getRepeatedMost(s,v1,res2);
-        }
-        if(!res2.empty()){
-            printVec(res2);
-            cout<<endl;
-        }
-
-        //Test if results are the same
-        assert(res1==res2);
-    }
-}
 
 int main()
 {
     //Stdin redirect
-    freopen("input.txt","r",stdin);
+    //freopen("input.txt","r",stdin);
 
-    //Get input
-    //NOTE: I use cin>> to get input, so the test string cannot contain spaces. This problem could be avoided
-    //by using getline. Since it is trivial and has no impact on the result, I simply leave it out.
-    vector<string> testCases;
-    istream_iterator<string> iit(cin),eit;
-    copy(iit,eit,back_inserter(testCases));
+    //istream_iterator<string> iit(cin),eit;
+    //copy(iit,eit,back_inserter(testCases));
 
-    //Test
-    test(testCases);
+	vector<string> strs{"eat"};
+	Solution sol;
+	auto const& res=sol.groupAnagrams(strs);
+	for(auto const& v:res){
+		printVec(v);
+		cout<<endl;
+	}
 
     return 0;
 }
