@@ -35,54 +35,26 @@ template <typename T>
 void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
-
 class Solution {
-	string bucketSort(string const& s){
-		array<int,26> alphabet;
-		alphabet.fill(0);
-		for_each(s.begin(),s.end(),[&](char x){++alphabet[x-'a'];});
-		string res;
-		for(int i=0;i<26;++i){
-			while(alphabet[i]--) res.push_back('a'+i);
-		}
-		return res;
-	}
-	vector<vector<string>> groupAnagrams1(vector<string>& strs) {
-		vector<vector<string>> res;
-		if(strs.empty()) return res;
-		vector<string> tstrs=strs;
-		for_each(tstrs.begin(),tstrs.end(),[=](string& s){
-					bucketSort(s);});
-		vector<int> index(strs.size());
-		for(int i=0;i<strs.size();++i) index[i]=i;
-		sort(index.begin(),index.end(),[&](int a,int b){
-					return tstrs[a]<tstrs[b];});
-		res.push_back(vector<string>{strs[index[0]]});
-		for(int i=1;i<index.size();++i){
-			if(tstrs[index[i]]==tstrs[index[i-1]]){
-				res.back().push_back(strs[index[i]]);
-			}else{
-				res.push_back(vector<string>{strs[index[i]]});
-			}
-		}
-		return res;
-    }
 public:
-    vector<vector<string>> groupAnagrams(vector<string>& strs) {
-		vector<vector<string>> res;
-		if(strs.empty()) return res;
-		unordered_map<string,vector<string>> strMap;
-		for(auto const& s: strs){
-			auto const& ss=bucketSort(s);
-			strMap[ss].push_back(s);
+    double myPow(double x, int n) {
+		if(x==1||n==0) return 1;
+		if(n==1) return x;
+		if(n==-1) return 1/x;
+		long long _n=n>0?n:-(long long)n;
+		if(n<0){
+			x=1/x;
 		}
-		for(auto const& v: strMap){
-			res.push_back(v.second);
+		double ans=1;
+		double cur_prod=x;
+		for(;_n;_n/=2){
+			if(_n%2==1)
+			  ans*=cur_prod;
+			cur_prod*=cur_prod;
 		}
-		return res;
+		return ans;
     }
 };
-
 int main()
 {
     //Stdin redirect
@@ -91,13 +63,9 @@ int main()
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
 
-	vector<string> strs{"eat"};
 	Solution sol;
-	auto const& res=sol.groupAnagrams(strs);
-	for(auto const& v:res){
-		printVec(v);
-		cout<<endl;
-	}
+	auto const& res=sol.myPow(1,numeric_limits<int>::min());
+	cout<<res<<endl;
 
     return 0;
 }
