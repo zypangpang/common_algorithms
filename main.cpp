@@ -7,6 +7,7 @@
 #include <cassert>
 #include <chrono>
 #include <array>
+#include <cmath>
 
 using namespace std;
 
@@ -36,36 +37,23 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 class Solution {
-	bool _canJump(int x,vector<int> const& nums,vector<int>& can){
-		if(can[x]!=-1) return can[x]==1;
-		if(x==nums.size()-1){
-			can[x]=1;
-			return true;
-		}
-		int maxSteps=x+nums[x]>=nums.size()?nums.size()-x-1:nums[x];
-		for(int i=maxSteps;i>0;--i){
-			if(_canJump(x+i,nums,can)){
-				can[x+i]=1;
-				return true;
-			}else
-			  can[x+i]=0;
-		}
-		can[x]=0;
-		return false;
-	}
 public:
-    bool canJump(vector<int>& nums) {
-		int n=nums.size();
-		int good=n-1;
-		for(int i=n-2;i>=0;--i){
-			int maxSteps=i+nums[i]>=n?n-i-1:nums[i];
-			if(i+maxSteps>=good)
-			  good=i;
-
+    int mySqrt(int x) {
+		//if(x==0) return 0;
+		if(x==1) return 1;
+		int left=0,right=x/2+1;
+		while(left<right){
+			int mid=((left+right)>>1);
+			long long t=(long long)mid*(long long)mid;
+			if(t==x) return mid;
+			if(t<x)
+			  left=mid+1;
+			else
+			  right=mid;
 		}
-		return good==0;
+		return left-1;
     }
-};;
+};
 
 int main()
 {
@@ -75,10 +63,11 @@ int main()
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
 	
-	vector<int> a{3};
+	vector<int> vec{9,9,9};
 
 	Solution sol;
-	cout<<sol.canJump(a)<<endl;
+	auto const& v=sol.mySqrt(4);
+	cout<<v<<endl;
 
     return 0;
 }
