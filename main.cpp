@@ -36,25 +36,37 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 class Solution {
+	bool _canJump(int x,vector<int> const& nums,vector<int>& can){
+		if(can[x]!=-1) return can[x]==1;
+		if(x==nums.size()-1){
+			can[x]=1;
+			return true;
+		}
+		int maxSteps=x+nums[x]>=nums.size()?nums.size()-x-1:nums[x];
+		for(int i=maxSteps;i>0;--i){
+			if(_canJump(x+i,nums,can)){
+				can[x+i]=1;
+				return true;
+			}else
+			  can[x+i]=0;
+		}
+		can[x]=0;
+		return false;
+	}
 public:
-    double myPow(double x, int n) {
-		if(x==1||n==0) return 1;
-		if(n==1) return x;
-		if(n==-1) return 1/x;
-		long long _n=n>0?n:-(long long)n;
-		if(n<0){
-			x=1/x;
+    bool canJump(vector<int>& nums) {
+		int n=nums.size();
+		int good=n-1;
+		for(int i=n-2;i>=0;--i){
+			int maxSteps=i+nums[i]>=n?n-i-1:nums[i];
+			if(i+maxSteps>=good)
+			  good=i;
+
 		}
-		double ans=1;
-		double cur_prod=x;
-		for(;_n;_n/=2){
-			if(_n%2==1)
-			  ans*=cur_prod;
-			cur_prod*=cur_prod;
-		}
-		return ans;
+		return good==0;
     }
-};
+};;
+
 int main()
 {
     //Stdin redirect
@@ -62,10 +74,11 @@ int main()
 
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
+	
+	vector<int> a{3};
 
 	Solution sol;
-	auto const& res=sol.myPow(1,numeric_limits<int>::min());
-	cout<<res<<endl;
+	cout<<sol.canJump(a)<<endl;
 
     return 0;
 }
