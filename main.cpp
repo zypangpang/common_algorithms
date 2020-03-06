@@ -38,20 +38,38 @@ void printVec(vector<T> const& v){
 }
 class Solution {
 public:
-    int mySqrt(int x) {
-		//if(x==0) return 0;
-		if(x==1) return 1;
-		int left=0,right=x/2+1;
-		while(left<right){
-			int mid=((left+right)>>1);
-			long long t=(long long)mid*(long long)mid;
-			if(t==x) return mid;
-			if(t<x)
-			  left=mid+1;
-			else
-			  right=mid;
+    string minWindow(string s, string t) {
+		unordered_map<char,int> m,tm;
+		for(auto c:t){
+			++tm[c];
+			m[c]=0;
 		}
-		return left-1;
+		int charCnt=tm.size();
+		int p=0,q=0,minWin=numeric_limits<int>::max(),sp=0,sq=0;
+		int cnt=0;
+		while(q<s.size()){
+			auto c=s[q];
+			++q;
+			if(m.count(c)){
+				++m[c];
+				if(m[c]==tm[c]) ++cnt;
+				while(p<q&&cnt==charCnt){
+					auto x=s[p];
+					if(m.count(x)){
+						--m[x];
+						if(m[x]<tm[x]){
+							--cnt;
+							if(q-p<minWin){
+								minWin=q-p;
+								sp=p;sq=q;
+							}
+						}
+					}
+					++p;
+				}
+			}
+		}
+		return s.substr(sp,sq-sp);
     }
 };
 
@@ -62,12 +80,11 @@ int main()
 
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
-	
-	vector<int> vec{9,9,9};
+	string S = "aab", T = "aa";
 
 	Solution sol;
-	auto const& v=sol.mySqrt(4);
-	cout<<v<<endl;
+	auto const& x=sol.minWindow(S,T);
+	cout<<x<<endl;
 
     return 0;
 }
