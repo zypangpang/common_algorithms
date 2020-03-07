@@ -37,40 +37,50 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 class Solution {
+	vector<vector<int>> ans;
+	void _subset(int k,vector<int> const& nums,vector<int>& res){
+		if(k>=nums.size()){
+			ans.push_back(res);
+			return;
+		}
+		_subset(k+1,nums,res);
+		res.push_back(nums[k]);
+		_subset(k+1,nums,res);
+		res.pop_back();
+	}
+	vector<int> getSubset(int k,vector<int> const& s){
+		vector<int> ans;
+		for(int i=0;i<s.size();++i){
+			if(k&1<<i) ans.push_back(s[i]);
+		}
+		return ans;
+	}
 public:
-    string minWindow(string s, string t) {
-		unordered_map<char,int> m,tm;
-		for(auto c:t){
-			++tm[c];
-			m[c]=0;
-		}
-		int charCnt=tm.size();
-		int p=0,q=0,minWin=numeric_limits<int>::max(),sp=0,sq=0;
-		int cnt=0;
-		while(q<s.size()){
-			auto c=s[q];
-			++q;
-			if(m.count(c)){
-				++m[c];
-				if(m[c]==tm[c]) ++cnt;
-				while(p<q&&cnt==charCnt){
-					auto x=s[p];
-					if(m.count(x)){
-						--m[x];
-						if(m[x]<tm[x]){
-							--cnt;
-							if(q-p<minWin){
-								minWin=q-p;
-								sp=p;sq=q;
-							}
-						}
-					}
-					++p;
-				}
+	vector<vector<int>> subsetsRecur(vector<int>& nums){
+		vector<int> res;
+		_subset(0,nums,res);
+		return ans;
+	}
+
+    vector<vector<int>> subsetsIter(vector<int>& nums) {
+		vector<vector<int>> ans;
+		ans.push_back(vector<int>());
+		for(auto cur: nums){
+			vector<vector<int>> t=ans;
+			for(auto& x: ans){
+				x.push_back(cur);
 			}
+			ans.insert(ans.end(),move(t.begin()),move(t.end()));
 		}
-		return s.substr(sp,sq-sp);
+		
+		return ans;
     }
+	vector<vector<int>> subsetBit(vector<int>& nums){
+		for(int i=0;i<1<<nums.size();++i){
+			ans.push_back(getSubset(i,nums));
+		}
+		return ans;
+	}
 };
 
 int main()
@@ -80,11 +90,14 @@ int main()
 
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
-	string S = "aab", T = "aa";
+	vector<int> a{1,2,3};
 
 	Solution sol;
-	auto const& x=sol.minWindow(S,T);
-	cout<<x<<endl;
+	auto const& x=sol.subsetBit(a);
+	for(auto const& v: x){
+		printVec(v);
+		cout<<endl;
+	}
 
     return 0;
 }
