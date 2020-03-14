@@ -37,88 +37,70 @@ template <typename T>
 void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+};
+TreeNode* buildTree(vector<int> const& v,int& i){
+	if(v[i]==-1)
+	  return NULL;
+	auto root=new TreeNode(v[i]);
+	root->left=buildTree(v,++i);
+	root->right=buildTree(v,++i);
+	return root;
+}
 class Solution {
-	vector<int> tree;
-	void buildTree(vector<int> const& h,int l,int r,int node){
-        if(l>=r) return;
-		if(l+1==r){
-			tree[node]=l;
-			return;
+	bool isValid(TreeNode* root,long long& minE,long long& maxE){
+		if(root==NULL){
+			minE=numeric_limits<long long>::max();
+			maxE=numeric_limits<long long>::min();
+			return true;
 		}
-		int mid=l+((r-l)>>1);
-		buildTree(h,l,mid,node<<1);
-		buildTree(h,mid,r,node<<1|1);
-		tree[node]=h[tree[node<<1]]<=h[tree[node<<1|1]]?tree[node<<1]:tree[node<<1|1];
-	}
-	int getMinFast(vector<int> const& h,int l,int r,int node,int L,int R){
-		if(L<=l&&R>=r) return tree[node];
-		int resL=-1,resR=-1;
-		int mid=l+((r-l)>>1);
-		if(mid>L) resL=getMinFast(h,l,mid,node<<1,L,R);
-		if(mid<R)  resR=getMinFast(h,mid,r,node<<1|1,L,R);
-		if(resL!=-1&& resR!=-1) return h[resL]<=h[resR]? resL:resR;
-		if(resL!=-1) return resL;
-		return resR;
-	}
-	int getMin(vector<int> const& h, int l,int r){
-		int minE=h[l];
-		int minId=l;
-		for(int i=l+1;i<r;++i)
-		  if(h[i]<minE){
-			  minE=h[i];
-			  minId=i;
-		  }
-		return minId;
-	}
-	int _getArea(vector<int> const& h,int l,int r){
-		if(l>=r) return 0;
-		int minId=getMinFast(h,0,h.size(),1,l,r);
-		int cur=h[minId]*(r-l);
-		return max(cur,max(_getArea(h,l,minId),_getArea(h,minId+1,r)));
-	}
-	//Stack approach. Essentially, find left first smaller and right first smaller element.
-	int getAreaStack(vector<int>& ht){
-		stack<int> stk;
-		vector<int> h;
-		h.push_back(0);
-		h.insert(h.end(),move(ht.begin()),move(ht.end()));
-		h.push_back(0);
-		int res=0;
-		for(int i=0;i<h.size();++i){
-			//Actually, > only guarantee the right first smaller one, the left is left first smaller or equal one.
-			while(!stk.empty()&& h[stk.top()]>h[i]){
-				int tmp=stk.top();stk.pop();
-				res=max(res,(i-1-stk.top())*h[tmp]);
-			}
-			stk.push(i);
-		}
-		return res;
+		long long minL,maxL,minR,maxR;
+		auto l=isValid(root->left,minL,maxL);
+		auto r=isValid(root->right,minR,maxR);
+		if(!l||!r) return false;
+		minE=min((long long)(root->val),min(minL,minR));
+		maxE=max((long long)(root->val),max(maxL,maxR));
+		if(maxL<root->val&&minR>root->val)
+		  return true;
+		else return false;
 	}
 public:
-    int largestRectangleArea(vector<int>& heights) {
-		if(heights.empty()) return 0;
-		int n=heights.size();
-		/*tree.resize(4*n);
-		buildTree(heights,0,n,1);
-		int res=0;
-		res=_getArea(heights,0,n);*/
-		int res=getAreaStack(heights);
-		return res;
+    bool isValidBST(TreeNode* root) {
+		//long long a,b;
+		long long cur=numeric_limits<long long>::min();
+		//return isValid(root,a,b);
+		return inOrder(root,cur);
     }
+	bool inOrder(TreeNode* root,long long& cur){
+		if(root==NULL) return true;
+		if(!inOrder(root->left,cur)) return false;
+		if(root->val<=cur) return false;
+		cur=root->val;
+		if(!inOrder(root->right,cur)) return false;
+		return true;
+	}
 };
-
 int main()
 {
+
+//[3,null,30,10,null,null,15,null,45]
     //Stdin redirect
     //freopen("input.txt","r",stdin);
 
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
 	
-	//vector<int> heights{2,1,5,6,2,3};
-	vector<int> heights {0,0,0,0,0,0,0,0,2147483647};
+	//vector<int> v{2,1,-1,-1,3,-1,-1};
+	vector<int> v{3,-1,30,10,-1,15,-1,45,-1,-1,-1};
+	//vector<int> v{5,1,-1,-1,4,3,-1,-1,6,-1,-1};
+	int i=0;
+	auto root=buildTree(v,i);
 	Solution sol;
-	auto x=sol.largestRectangleArea(heights);
+	auto x=sol.isValidBST(root);
 	cout<<x<<endl;
 
     return 0;
