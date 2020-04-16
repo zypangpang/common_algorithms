@@ -39,92 +39,62 @@ void printVec(vector<T> const& v){
 	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
 }
 
-int getMinSub(vector<vector<int>> const& mat,int n){
-    int res=0;
-    for(int i=0;i<n-1;++i){
-        int minVal=numeric_limits<int>::max();
-        for(int j=0;j<3;++j){
-            for(int k=0;k<3;++k){
-                if(abs(mat[j][i]-mat[k][i+1])<minVal){
-                    minVal=abs(mat[j][i]-mat[k][i+1]);
-                }
-            }
-        }
-        res+=minVal;
+class Solution {
+	vector<vector<bool>> p;
+	void prepare(string s) {
+		int n=s.size();
+		p=vector<vector<bool>>(n,vector<bool>(n));
+		for(int i=0;i<n;++i) {
+			p[i][i]=true;
+		}
+		for(int i=0;i<n-1;++i)
+		  if(s[i]==s[i+1]){
+			p[i][i+1]=true;
+		  }
+		for(int i=n-3;i>=0;--i){
+			for(int j=i+2;j<n;++j){
+				p[i][j]=p[i+1][j-1]&&s[i]==s[j];
+			}
+		}
+		/*for(auto& v: p){
+			printVec(v);
+			cout<<endl;
+		}*/
     }
-}
-long long getMin(vector<vector<int>> const& mat, int n ){
-    vector<long long> minVal(3);
-    for(int i=1;i<n;++i){
-        vector<long long> t(3,numeric_limits<int>::max());
-        for(int j=0;j<3;++j){
-            for(int k=0;k<3;++k){
-                long long x=abs((long long)mat[j][i]-(long long)mat[k][i-1])+minVal[k];
-                if(x<t[j]){
-                    t[j]=x;
-                }
-            }
-        }
-        minVal=t;
-        //printVec(minVal);
-        //cout<<endl;
+	bool isPalindrome(string s){
+		int p=0,q=s.size()-1;
+		while(p<q){
+			if(s[p]!=s[q]) return false;
+			++p;--q;
+		}
+		return true;
+	}
+	unordered_map<string,vector<vector<string>>> vmap;
+	vector<vector<string>> _partition(string& oriS,int b,int e) {
+		if(e-b<1) return vector<vector<string>>(1);
+		string s=oriS.substr(b,e-b);
+		if(vmap.count(s)) return vmap[s];
+		vector<vector<string>> ans;
+		for(int i=0;i<s.size();++i){
+			auto right=s.substr(i);
+			if(p[b+i][e-1]){
+				auto subPars=_partition(s,b,b+i);
+				for(auto& v: subPars){
+					v.push_back(right);
+					ans.push_back(move(v));
+				}
+			}
+		}
+		vmap[s]=ans;
+		return ans;
     }
-    return min(minVal[0],min(minVal[1],minVal[2]));
-}
-void fix(vector<vector<int>>& mat){
-    int n=mat.size();
-    int m=mat[0].size();
-    vector<long long> row(n,numeric_limits<long long>::max());
-    vector<long long> col(m,numeric_limits<long long>::max());
-    for(int i=0;i<n;++i){
-        for(int j=0;j<m-1;++j){
-            if(mat[i][j]!=0&&mat[i][j+1]!=0){
-                row[i]=(long long)mat[i][j+1]-(long long)mat[i][j];
-            }
-        }
-    }
-    for(int j=0;j<m;++j){
-        for(int i=0;i<n-1;++i){
-            if(mat[i+1][j]!=0&&mat[i][j]!=0){
-                col[j]=(long long)mat[i+1][j]-(long long)mat[i][j];
-            }
-        }
-    }
-    for(int i=0;i<n;++i){
-        if(row[i]!=numeric_limits<long long>::max()){
-            int k=-1;
-            for(k=0;k<m;++k){
-                if(mat[i][k]!=0)
-                    break;
-            }
-            if(k!=-1){
-                for(int j=k-1;j>=0;--j){
-                    mat[i][j]=mat[i][j+1]-row[i];
-                }
-                for(int j=k+1;j<m;++j){
-                    mat[i][j]=mat[i][j-1]+row[i];
-                }
-            }
-        }
-    }
-    for(int j=0;j<m;++j){
-        if(col[j]!=numeric_limits<long long>::max()){
-            int k=-1;
-            for(k=0;k<n;++k){
-                if(mat[k][j]!=0)
-                    break;
-            }
-            if(k!=-1){
-                for(int i=k-1;i>=0;--i){
-                    mat[i][j]=mat[i+1][j]-col[j];
-                }
-                for(int i=k+1;i<n;++i){
-                    mat[i][j]=mat[i-1][j]+col[j];
-                }
-            }
-        }
-    }
-}
+public:
+    vector<vector<string>> partition(string s) {
+		prepare(s);
+		return _partition(s,0,s.size());
+	}
+};
+
 int main()
 {
 
@@ -133,31 +103,13 @@ int main()
 
     //istream_iterator<string> iit(cin),eit;
     //copy(iit,eit,back_inserter(testCases));
-    int n,m,q;
-    cin>>n>>m>>q;
-    vector<vector<int>> mat(n);
-    for(int i=0;i<n;++i){
-        for(int j=0;j<m;++j){
-            int t=0;
-            cin>>t;
-            mat[i].push_back(t);
-        }
-    }
-    fix(mat);
-    /*for(auto & x: mat){
-        printVec(x);
-        cout<<endl;
-    }*/
-    for(int i=0;i<q;++i){
-        int x,y;
-        cin>>x>>y;
-        if(mat[x][y]==0)
-            cout<<"Unknown"<<endl;
-        else {
-            cout<<mat[x][y]<<endl;
-        }
-    }
-
+	Solution sol;
+	string s="aab";
+	auto pars=sol.partition(s);
+	for(auto& vec: pars){
+		printVec(vec);
+		cout<<endl;
+	}
     return 0;
 }
 
