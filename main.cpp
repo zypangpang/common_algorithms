@@ -23,94 +23,69 @@ struct ScopedTimer{
         cout<<"<duration "<<duration.count()<<" us>"<<endl;
     }
 };
-/*template <typename Functor, typename ... Args>
-auto runningTime(Functor f, Args && ... args)
-    -> decltype(f(std::forward<Args>(args)...))
-{
-    //return std::function<R(Args...)>(f);
-    ScopedTimer timer;
-    return f(forward<Args>(args)...);
-}*/
 
-
-//Print helper
-template <typename T>
-void printVec(vector<T> const& v){
-	copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
+ostream& operator<<(ostream& out, pair<int,int> const& p){
+    out<<"("<<p.first<<","<<p.second<<")";
+    return out;
 }
 
-class Solution {
-	vector<vector<bool>> p;
-	void prepare(string s) {
-		int n=s.size();
-		p=vector<vector<bool>>(n,vector<bool>(n));
-		for(int i=0;i<n;++i) {
-			p[i][i]=true;
-		}
-		for(int i=0;i<n-1;++i)
-		  if(s[i]==s[i+1]){
-			p[i][i+1]=true;
-		  }
-		for(int i=n-3;i>=0;--i){
-			for(int j=i+2;j<n;++j){
-				p[i][j]=p[i+1][j-1]&&s[i]==s[j];
-			}
-		}
-		/*for(auto& v: p){
-			printVec(v);
-			cout<<endl;
-		}*/
+template <typename T>
+void printVec(T const& v,string split=" "){
+    //copy(v.begin(),v.end(),ostream_iterator<T>(cout," "));
+    for(auto const& x:v){
+        cout<<x<<split;
     }
-	bool isPalindrome(string s){
-		int p=0,q=s.size()-1;
-		while(p<q){
-			if(s[p]!=s[q]) return false;
-			++p;--q;
-		}
-		return true;
-	}
-	unordered_map<string,vector<vector<string>>> vmap;
-	vector<vector<string>> _partition(string& oriS,int b,int e) {
-		if(e-b<1) return vector<vector<string>>(1);
-		string s=oriS.substr(b,e-b);
-		if(vmap.count(s)) return vmap[s];
-		vector<vector<string>> ans;
-		for(int i=0;i<s.size();++i){
-			auto right=s.substr(i);
-			if(p[b+i][e-1]){
-				auto subPars=_partition(s,b,b+i);
-				for(auto& v: subPars){
-					v.push_back(right);
-					ans.push_back(move(v));
-				}
-			}
-		}
-		vmap[s]=ans;
-		return ans;
-    }
+}
+
+class LRUCache {
+    int capacity;
+    list<pair<int,int>> keyOrder;
+    unordered_map<int,list<pair<int,int>>::iterator> keyValueMap;
 public:
-    vector<vector<string>> partition(string s) {
-		prepare(s);
-		return _partition(s,0,s.size());
-	}
+    LRUCache(int tcapacity): capacity(tcapacity) {
+    }
+
+    int get(int key) {
+        if(keyValueMap.find(key) == keyValueMap.end()){
+            return -1;
+        }
+        auto tpair=move(*(keyValueMap[key]));
+        keyOrder.push_front(tpair);
+        keyOrder.erase(keyValueMap[key]);
+        keyValueMap[key]=keyOrder.begin();
+        return keyOrder.begin()->second;
+    }
+
+    void put(int key, int value) {
+        if(keyValueMap.find(key) != keyValueMap.end()){
+            keyValueMap[key]->second=value;
+            get(key);
+            return;
+        }
+        if(keyOrder.size()==capacity){
+            int eraseKey=keyOrder.back().first;
+            keyOrder.pop_back();
+            keyValueMap.erase(eraseKey);
+        }
+        keyOrder.push_front({key,value});
+        keyValueMap[key]=keyOrder.begin();
+    }
 };
 
-int main()
-{
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache* obj = new LRUCache(capacity);
+ * int param_1 = obj->get(key);
+ * obj->put(key,value);
+ */
 
-    //Stdin redirect
-    //freopen("input.txt","r",stdin);
-
-    //istream_iterator<string> iit(cin),eit;
-    //copy(iit,eit,back_inserter(testCases));
-	Solution sol;
-	string s="aab";
-	auto pars=sol.partition(s);
-	for(auto& vec: pars){
-		printVec(vec);
-		cout<<endl;
-	}
+int main(){
+    map<pair<int,int>,int> a;
+    a[{1,2}]=3;
+    a[{3,4}]=5;
+    for (auto x : a ) {
+        cout<<x.first<<" ";
+        cout<<x.second<<endl;
+    }
     return 0;
 }
-
-
