@@ -36,56 +36,92 @@ void printVec(T const& v,string split=" "){
         cout<<x<<split;
     }
 }
-
-class LRUCache {
-    int capacity;
-    list<pair<int,int>> keyOrder;
-    unordered_map<int,list<pair<int,int>>::iterator> keyValueMap;
-public:
-    LRUCache(int tcapacity): capacity(tcapacity) {
-    }
-
-    int get(int key) {
-        if(keyValueMap.find(key) == keyValueMap.end()){
-            return -1;
-        }
-        auto tpair=move(*(keyValueMap[key]));
-        keyOrder.push_front(tpair);
-        keyOrder.erase(keyValueMap[key]);
-        keyValueMap[key]=keyOrder.begin();
-        return keyOrder.begin()->second;
-    }
-
-    void put(int key, int value) {
-        if(keyValueMap.find(key) != keyValueMap.end()){
-            keyValueMap[key]->second=value;
-            get(key);
-            return;
-        }
-        if(keyOrder.size()==capacity){
-            int eraseKey=keyOrder.back().first;
-            keyOrder.pop_back();
-            keyValueMap.erase(eraseKey);
-        }
-        keyOrder.push_front({key,value});
-        keyValueMap[key]=keyOrder.begin();
-    }
+//Definition for singly-linked list.
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode(int x) : val(x), next(NULL) {}
+	ListNode():val(0),next(NULL){}
 };
 
-/**
- * Your LRUCache object will be instantiated and called as such:
- * LRUCache* obj = new LRUCache(capacity);
- * int param_1 = obj->get(key);
- * obj->put(key,value);
- */
+ListNode* makeList(vector<int> const& t){
+	ListNode* head=new ListNode();
+	ListNode* tp=head;
+	for(auto i: t){
+		head->next=new ListNode(i);
+		head=head->next;
+	}
+    return tp->next;
+}
+
+void printList(ListNode* head){
+	for(;head!=NULL;head=head->next){
+		cout<<head->val<<" ";
+	}
+}
+class Solution {
+    ListNode* mergeSort(ListNode* b){
+    if(b->next==NULL) {
+		return b;
+	}
+	//for(int i=0;i<n/2;++i) m=m->next;
+	auto slow=b,fast=b->next;
+	while(fast && fast->next){
+		fast=fast->next->next;
+		slow=slow->next;
+	}
+	auto m=slow->next;
+	slow->next=NULL;
+
+    b=mergeSort(b);
+    m=mergeSort(m);
+
+    ListNode* p=b,*q=m;
+	ListNode* head=new ListNode(0);
+	auto t=head;
+    while(p!=NULL||q!=NULL){
+		if(q==NULL||p!=NULL && p->val<q->val){
+			t->next=p;
+			p=p->next;
+		}else{
+			t->next=q;
+			q=q->next;
+		}
+		t=t->next;
+    }
+	auto res=head->next;
+	delete head;
+    return res;
+}
+public:
+    ListNode* sortList(ListNode* head) {
+		if(head==NULL || head->next==NULL) return head;
+        auto res=mergeSort(head);
+        return res;
+    }
+};
+int reverseNum=0;
 
 int main(){
-    map<pair<int,int>,int> a;
-    a[{1,2}]=3;
-    a[{3,4}]=5;
-    for (auto x : a ) {
-        cout<<x.first<<" ";
-        cout<<x.second<<endl;
-    }
+	vector<int> a{4,3,5,7};
+    Solution s;
+	auto t=makeList(a);
+	printList(t);
+	cout<<endl;
+
+	/*
+	auto fast=t->next;
+	auto slow=t;
+	while(fast && fast->next){
+		slow=slow->next;
+		fast=fast->next->next;
+	}
+	cout<<slow->val;
+	cout<<endl;
+	*/
+
+
+    auto x=s.sortList(t);
+    printList(x);
     return 0;
 }
