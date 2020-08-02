@@ -10,6 +10,7 @@
 #include <cmath>
 #include <stack>
 #include <queue>
+#include <string>
 
 using namespace std;
 
@@ -36,92 +37,49 @@ void printVec(T const& v,string split=" "){
         cout<<x<<split;
     }
 }
-//Definition for singly-linked list.
-struct ListNode {
-    int val;
-    ListNode *next;
-    ListNode(int x) : val(x), next(NULL) {}
-	ListNode():val(0),next(NULL){}
-};
 
-ListNode* makeList(vector<int> const& t){
-	ListNode* head=new ListNode();
-	ListNode* tp=head;
-	for(auto i: t){
-		head->next=new ListNode(i);
-		head=head->next;
-	}
-    return tp->next;
-}
-
-void printList(ListNode* head){
-	for(;head!=NULL;head=head->next){
-		cout<<head->val<<" ";
-	}
-}
 class Solution {
-    ListNode* mergeSort(ListNode* b){
-    if(b->next==NULL) {
-		return b;
-	}
-	//for(int i=0;i<n/2;++i) m=m->next;
-	auto slow=b,fast=b->next;
-	while(fast && fast->next){
-		fast=fast->next->next;
-		slow=slow->next;
-	}
-	auto m=slow->next;
-	slow->next=NULL;
-
-    b=mergeSort(b);
-    m=mergeSort(m);
-
-    ListNode* p=b,*q=m;
-	ListNode* head=new ListNode(0);
-	auto t=head;
-    while(p!=NULL||q!=NULL){
-		if(q==NULL||p!=NULL && p->val<q->val){
-			t->next=p;
-			p=p->next;
-		}else{
-			t->next=q;
-			q=q->next;
-		}
-		t=t->next;
-    }
-	auto res=head->next;
-	delete head;
-    return res;
-}
 public:
-    ListNode* sortList(ListNode* head) {
-		if(head==NULL || head->next==NULL) return head;
-        auto res=mergeSort(head);
-        return res;
+    string fractionToDecimal(int numerator, int denominator) {
+		if(numerator==0) return "0";
+		
+		bool negative=(numerator>0)^(denominator>0);
+
+		long long remain=numerator,divide=denominator;
+		if(remain<0) remain=-remain;
+		if(divide<0) divide=-divide;
+
+		unordered_map<long long,int> rMap;
+		string ans;
+		if(remain>divide){
+			ans+=to_string(remain/divide);
+			remain=remain%divide;
+		}else{
+			ans.push_back('0');
+		}
+
+		if(remain>0){
+			ans.push_back('.');
+		}
+
+		while(remain>0 && rMap.find(remain)==rMap.end()){
+			rMap[remain]=ans.size()-1;
+			remain*=10;
+			ans.push_back('0'+remain/divide);
+			remain%=divide;
+		}
+		if(rMap.find(remain)!=rMap.end()){
+			ans=ans.substr(0,rMap[remain]+1)+"("+ans.substr(rMap[remain]+1)+")";
+		}
+
+		return negative? "-"+ans:ans;
     }
 };
-int reverseNum=0;
 
 int main(){
-	vector<int> a{4,3,5,7};
+	int n=7,d=-12;
     Solution s;
-	auto t=makeList(a);
-	printList(t);
-	cout<<endl;
+	cout<<s.fractionToDecimal(n,d)<<endl;
 
-	/*
-	auto fast=t->next;
-	auto slow=t;
-	while(fast && fast->next){
-		slow=slow->next;
-		fast=fast->next->next;
-	}
-	cout<<slow->val;
-	cout<<endl;
-	*/
-
-
-    auto x=s.sortList(t);
-    printList(x);
-    return 0;
+	return 0;
 }
